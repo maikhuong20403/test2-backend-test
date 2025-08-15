@@ -321,8 +321,6 @@ SELECT recalculate_user_count();
 | `npm start` | Start production server |
 | `npm run dev` | Start development server with auto-reload |
 | `npm run migrate` | Run database migrations |
-| `npm test api` | Test API endpoints (requires server running) |
-| `npm test triggers` | Test database triggers and functions |
 | `node src/migrations/setup.js sample` | Add sample data for testing |
 
 ## 🔧 Troubleshooting
