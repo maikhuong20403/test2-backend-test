@@ -423,5 +423,3 @@ volumes:
 ## 📄 License
 
 MIT License - see LICENSE file for details
-#   t e s t 2 - b a c k e n d - t e s t  
- 
