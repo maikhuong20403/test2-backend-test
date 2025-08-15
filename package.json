@@ -1,0 +1,23 @@
+{
+  "name": "fastify-usercount-api",
+  "version": "1.0.0",
+  "description": "RESTful API using Fastify with optimized user count via materialized views",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "migrate": "node src/migrations/setup.js"
+  },
+  "keywords": ["fastify", "postgresql", "api", "materialized-view"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^4.24.3",
+    "pg": "^8.11.3",
+    "@fastify/cors": "^8.4.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

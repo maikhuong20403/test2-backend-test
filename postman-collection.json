@@ -1,0 +1,404 @@
+{
+  "info": {
+    "name": "Fastify User Count API",
+    "description": "Test collection for the Fastify User Count API with materialized views",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:6776",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "event": [ 
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has correct structure', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('status');",
+              "    pm.expect(jsonData).to.have.property('timestamp');",
+              "    pm.expect(jsonData).to.have.property('database');",
+              "});",
+              "",
+              "pm.test('Database is healthy', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql('healthy');",
+              "    pm.expect(jsonData.database.status).to.eql('healthy');",
+              "    pm.expect(jsonData.database.connected).to.be.true;",
+              "});",
+              "",
+              "pm.test('Response time is less than 1000ms', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Get User Count",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has correct structure', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('totalUsers');",
+              "    pm.expect(jsonData).to.have.property('lastUpdated');",
+              "});",
+              "",
+              "pm.test('totalUsers is a number', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.totalUsers).to.be.a('number');",
+              "    pm.expect(jsonData.totalUsers).to.be.at.least(0);",
+              "});",
+              "",
+              "pm.test('lastUpdated is a valid timestamp', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.lastUpdated).to.be.a('string');",
+              "    pm.expect(new Date(jsonData.lastUpdated)).to.be.a('date');",
+              "});",
+              "",
+              "pm.test('Response time is less than 100ms (O(1) performance)', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(100);",
+              "});",
+              "",
+              "// Store the count for comparison in later tests",
+              "pm.globals.set('currentUserCount', pm.response.json().totalUsers);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/usercount",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "usercount"]
+        }
+      }
+    },
+    {
+      "name": "Invalid Endpoint - 404 Test",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 404', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test('Response time is reasonable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/invalid-endpoint",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "invalid-endpoint"]
+        }
+      }
+    },
+    {
+      "name": "Add Test User 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('User added successfully', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response time is reasonable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "INSERT INTO user_list (username, email) VALUES ('john_doe', 'john@example.com');"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/sql",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "sql"]
+        }
+      }
+    },
+    {
+      "name": "Add Test User 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('User added successfully', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response time is reasonable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "INSERT INTO user_list (username, email) VALUES ('jane_smith', 'jane@example.com');"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/sql",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "sql"]
+        }
+      }
+    },
+    {
+      "name": "Add Test User 3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('User added successfully', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response time is reasonable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "INSERT INTO user_list (username, email) VALUES ('bob_wilson', 'bob@example.com');"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/sql",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "sql"]
+        }
+      }
+    },
+    {
+      "name": "Add Test User 4",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('User added successfully', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response time is reasonable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "INSERT INTO user_list (username, email) VALUES ('alice_brown', 'alice@example.com');"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/sql",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "sql"]
+        }
+      }
+    },
+    {
+      "name": "Add Test User 5",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('User added successfully', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response time is reasonable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "INSERT INTO user_list (username, email) VALUES ('charlie_davis', 'charlie@example.com');"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/sql",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "sql"]
+        }
+      }
+    },
+    {
+      "name": "Verify User Count After Adding Users",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('User count increased', function () {",
+              "    const jsonData = pm.response.json();",
+              "    const previousCount = pm.globals.get('currentUserCount') || 0;",
+              "    pm.expect(jsonData.totalUsers).to.be.above(previousCount);",
+              "    pm.globals.set('newUserCount', jsonData.totalUsers);",
+              "});",
+              "",
+              "pm.test('Triggers working correctly', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.totalUsers).to.be.at.least(5);",
+              "});",
+              "",
+              "pm.test('Fast response time (O(1))', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(50);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/usercount",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "usercount"]
+        }
+      }
+    },
+    {
+      "name": "Performance Test - Multiple Requests",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Consistent response time (O(1) performance)', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(50);",
+              "});",
+              "",
+              "pm.test('Consistent user count', function () {",
+              "    const jsonData = pm.response.json();",
+              "    const previousCount = pm.globals.get('currentUserCount');",
+              "    pm.expect(jsonData.totalUsers).to.eql(parseInt(previousCount));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/usercount",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "usercount"]
+        }
+      }
+    }
+  ]
+}
