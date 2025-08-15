@@ -147,16 +147,6 @@ GET /health
 }
 ```
 
-### Test API Endpoints
-
-```bash
-# Start the server first
-npm start
-
-# In another terminal
-npm test api
-```
-
 ### Add Sample Data
 
 ```bash
